@@ -23,7 +23,7 @@ class HomeSummaryCard extends StatelessWidget {
 
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4F46E5).withOpacity(0.25),
+            color: const Color(0xFF4F46E5).withValues(alpha: 0.25),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -85,7 +85,7 @@ class HomeSummaryCard extends StatelessWidget {
 
           Container(
             height: 1,
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
           ),
 
           const SizedBox(height: 18),
