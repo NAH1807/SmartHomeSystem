@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class SettingItem extends StatelessWidget {
   final IconData icon;
   final String title;
+  final VoidCallback? onTap;
 
   const SettingItem({
     super.key,
     required this.icon,
     required this.title,
+    this.onTap,
   });
 
   @override
@@ -25,7 +27,7 @@ class SettingItem extends StatelessWidget {
         color: Colors.grey,
       ),
 
-      onTap: () {},
+      onTap: onTap,
     );
   }
 }

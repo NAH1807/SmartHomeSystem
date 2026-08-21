@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 
 enum DeviceType {
   light,
-  airConditioner,
-  smartPlug,
+  camera,
   temperatureSensor,
+  airConditioner,
+  fan,
+  television,
+  wifiRouter,
+  smartPlug,
   doorSensor,
 }
 

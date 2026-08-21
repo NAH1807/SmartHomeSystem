@@ -42,13 +42,6 @@ class DevicesScreen extends StatelessWidget {
       icon: Icons.thermostat_outlined,
     ),
 
-    Device(
-      id: 'door_001',
-      name: 'Main Door',
-      room: 'Entrance',
-      type: DeviceType.doorSensor,
-      icon: Icons.door_front_door_outlined,
-    ),
   ];
 
   @override
