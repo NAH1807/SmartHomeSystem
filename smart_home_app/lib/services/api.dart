@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../models/motion.dart';
 import '../models/device.dart';
@@ -17,11 +18,31 @@ class ApiService {
   // Chrome/Desktop:
   //   http://localhost:3000/api
   //
+  static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+
+  String? _accessToken;
+
+  // Lưu token vào bộ nhớ bảo mật.
+  Future<void> saveToken(String token) async {
+    _accessToken = token;
+
+    await _secureStorage.write(key: 'access_token', value: token);
+  }
+
+  // Đọc token đã lưu khi mở ứng dụng.
+  Future<void> initialize() async {
+    _accessToken = await _secureStorage.read(key: 'access_token');
+  }
+
+  // Xóa token khi đăng xuất.
+  Future<void> clearToken() async {
+    _accessToken = null;
+
+    await _secureStorage.delete(key: 'access_token');
+  }
 
   static const String baseUrl = 'http://10.0.2.2:3000/api';
-
   final http.Client _client;
-
   ApiService({http.Client? client}) : _client = client ?? http.Client();
 
   // ============================================================
@@ -31,14 +52,16 @@ class ApiService {
   Map<String, String> get _headers => {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
+    if (_accessToken != null) 'Authorization': 'Bearer $_accessToken',
   };
+
+  bool get isAuthenticated => _accessToken != null && _accessToken!.isNotEmpty;
 
   // ============================================================
   // GET ALL DEVICES
   //
   // GET /api/devices
   // ============================================================
-
   Future<List<Device>> getDevices() async {
     final response = await _client.get(
       Uri.parse('$baseUrl/devices'),
@@ -78,7 +101,6 @@ class ApiService {
   //
   // GET /api/devices/:id
   // ============================================================
-
   Future<Device> getDevice(int deviceId) async {
     final response = await _client.get(
       Uri.parse('$baseUrl/devices/$deviceId'),
@@ -115,7 +137,6 @@ class ApiService {
   //
   // POST /api/devices
   // ============================================================
-
   Future<Device> createDevice({
     required String name,
     required DeviceType type,
@@ -149,7 +170,6 @@ class ApiService {
   //
   // PUT /api/devices/:id
   // ============================================================
-
   Future<Device> updateDevice({
     required int deviceId,
     required String name,
@@ -184,7 +204,6 @@ class ApiService {
   //
   // DELETE /api/devices/:id
   // ============================================================
-
   Future<void> deleteDevice(int deviceId) async {
     final response = await _client.delete(
       Uri.parse('$baseUrl/devices/$deviceId'),
@@ -205,7 +224,6 @@ class ApiService {
   //
   // Giá trị: 0 -> 100
   // ============================================================
-
   Future<Device> setDeviceIntensity({
     required int deviceId,
     required double intensity,
@@ -235,7 +253,6 @@ class ApiService {
   //
   // 16 -> 30 °C
   // ============================================================
-
   Future<Device> setDeviceTargetTemperature({
     required int deviceId,
     required double temperature,
@@ -263,7 +280,6 @@ class ApiService {
   //
   // cool / fan / dry / auto
   // ============================================================
-
   Future<Device> setDeviceAcMode({
     required int deviceId,
     required String mode,
@@ -507,7 +523,6 @@ class ApiService {
   }
 
   //Automation
-
   // Release device from quarantine
   Future<void> releaseDevice({
     required String deviceUid,
@@ -527,7 +542,6 @@ class ApiService {
   //
   // GET /api/devices/:id/motion
   // ============================================================
-
   Future<Motion?> getMotionConfig(int deviceId) async {
     final response = await _client.get(
       Uri.parse('$baseUrl/devices/$deviceId/motion'),
@@ -649,7 +663,6 @@ class ApiService {
   // ============================================================
   // PARSE DEVICE RESPONSE
   // ============================================================
-
   Device _parseDeviceResponse(
     http.Response response, {
     required String endpoint,
@@ -674,7 +687,6 @@ class ApiService {
   // ============================================================
   // DEVICE TYPE -> API STRING
   // ============================================================
-
   String _deviceTypeToApiValue(DeviceType type) {
     switch (type) {
       case DeviceType.relay:
@@ -689,9 +701,124 @@ class ApiService {
   }
 
   // ============================================================
-  // HTTP RESPONSE CHECK
+  // AUTHENTICATION
   // ============================================================
 
+  // REGISTER
+  // POST /api/auth/register
+  Future<Map<String, dynamic>> register({
+    required String username,
+    required String email,
+    required String password,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$baseUrl/auth/register'),
+      headers: _headers,
+      body: jsonEncode({
+        'username': username.trim(),
+        'email': email.trim().toLowerCase(),
+        'password': password,
+      }),
+    );
+
+    _checkResponse(response);
+
+    return Map<String, dynamic>.from(jsonDecode(response.body));
+  }
+
+  // LOGIN
+  // POST /api/auth/login
+  Future<Map<String, dynamic>> login({
+    required String username,
+    required String password,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$baseUrl/auth/login'),
+      headers: _headers,
+      body: jsonEncode({'username': username.trim(), 'password': password}),
+    );
+
+    _checkResponse(response);
+
+    final decoded = Map<String, dynamic>.from(jsonDecode(response.body));
+
+    final token = decoded['token'];
+
+    if (token == null || token.toString().isEmpty) {
+      throw Exception('Server không trả về access token');
+    }
+
+    await saveToken(token.toString());
+
+    return decoded;
+  }
+
+  // FORGOT PASSWORD - SEND OTP
+  // POST /api/auth/forgot-password
+  Future<Map<String, dynamic>> sendResetOtp({required String email}) async {
+    final response = await _client.post(
+      Uri.parse('$baseUrl/auth/forgot-password'),
+      headers: _headers,
+      body: jsonEncode({'email': email.trim().toLowerCase()}),
+    );
+
+    _checkResponse(response);
+
+    return Map<String, dynamic>.from(jsonDecode(response.body));
+  }
+
+  // VERIFY OTP
+  // POST /api/auth/verify-otp
+  Future<Map<String, dynamic>> verifyResetOtp({
+    required String email,
+    required String otp,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$baseUrl/auth/verify-otp'),
+      headers: _headers,
+      body: jsonEncode({
+        'email': email.trim().toLowerCase(),
+        'otp': otp.trim(),
+      }),
+    );
+
+    _checkResponse(response);
+
+    return Map<String, dynamic>.from(jsonDecode(response.body));
+  }
+
+  // RESET PASSWORD
+  // POST /api/auth/reset-password
+  Future<Map<String, dynamic>> resetPassword({
+    required String resetToken,
+    required String newPassword,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$baseUrl/auth/reset-password'),
+      headers: _headers,
+      body: jsonEncode({'resetToken': resetToken, 'newPassword': newPassword}),
+    );
+
+    _checkResponse(response);
+
+    return Map<String, dynamic>.from(jsonDecode(response.body));
+  }
+
+  // GET CURRENT USER
+  Future<Map<String, dynamic>> getCurrentUser() async {
+    final response = await _client.get(
+      Uri.parse('$baseUrl/auth/me'),
+      headers: _headers,
+    );
+
+    _checkResponse(response);
+
+    return Map<String, dynamic>.from(jsonDecode(response.body));
+  }
+
+  // ============================================================
+  // HTTP RESPONSE CHECK
+  // ============================================================
   void _checkResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return;
@@ -721,7 +848,6 @@ class ApiService {
   // ============================================================
   // DISPOSE
   // ============================================================
-
   void dispose() {
     _client.close();
   }

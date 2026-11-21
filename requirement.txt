@@ -1,0 +1,36 @@
+
+SMART HOME SYSTEM - DEPENDENCIES
+
+1. NODE.JS BACKEND
+// Cài đặt bằng terminal
+npm install
+        bcrypt
+        cors
+        dotenv
+        express
+        jsonwebtoken
+        mariadb
+        mqtt
+        nodemailer
+        nodemon
+
+2. FLUTTER MOBILE APPLICATION
+// Cài đặt bằng terminal
+flutter pub get
+        cupertino_icons
+        http
+        provider
+        flutter_inappwebview
+        video_player
+        flutter_secure_storage
+        flutter_test
+        flutter_lints
+
+3. DEVELOPMENT ENVIRONMENT
+Cài đặt:
+        Node.js
+        npm
+        Flutter SDK
+        Dart SDK
+        MariaDB
+        MQTT Broker

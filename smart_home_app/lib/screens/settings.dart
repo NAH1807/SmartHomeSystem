@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../widgets/setting_item.dart';
+
+import '../services/api.dart';
+import 'login.dart';
 
 // import 'profile_setting.dart';
 // import 'security_setting.dart';
@@ -18,7 +22,6 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
 
         children: [
-
           // ========================================
           // HEADER
           // ========================================
@@ -26,10 +29,7 @@ class SettingsScreen extends StatelessWidget {
           const Text(
             'Settings',
 
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 6),
@@ -37,9 +37,7 @@ class SettingsScreen extends StatelessWidget {
           const Text(
             'Manage your Smart Home',
 
-            style: TextStyle(
-              color: Colors.grey,
-            ),
+            style: TextStyle(color: Colors.grey),
           ),
 
           const SizedBox(height: 28),
@@ -47,164 +45,133 @@ class SettingsScreen extends StatelessWidget {
           // ========================================
           // ACCOUNT
           // ========================================
+          _section('Account', [
+            SettingItem(
+              icon: Icons.person_outline,
+              title: 'Profile',
 
-          _section(
-            'Account',
+              // onTap: () {
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (_) =>
+              //           const ProfileScreen(),
+              //     ),
+              //   );
+              // },
+            ),
 
-            [
-              SettingItem(
-                icon: Icons.person_outline,
-                title: 'Profile',
+            SettingItem(
+              icon: Icons.security_outlined,
+              title: 'Security',
 
-                // onTap: () {
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (_) =>
-                //           const ProfileScreen(),
-                //     ),
-                //   );
-                // },
-              ),
-
-              SettingItem(
-                icon: Icons.security_outlined,
-                title: 'Security',
-
-                // onTap: () {
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (_) =>
-                //           const SecurityScreen(),
-                //     ),
-                //   );
-                // },
-              ),
-            ],
-          ),
+              // onTap: () {
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (_) =>
+              //           const SecurityScreen(),
+              //     ),
+              //   );
+              // },
+            ),
+          ]),
 
           const SizedBox(height: 22),
 
           // ========================================
           // SMART HOME
           // ========================================
+          _section('Smart Home', [
+            SettingItem(
+              icon: Icons.notifications_none,
+              title: 'Notifications',
 
-          _section(
-            'Smart Home',
-
-            [
-              SettingItem(
-                icon: Icons.notifications_none,
-                title: 'Notifications',
-
-                // onTap: () {
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (_) =>
-                //           const NotificationSettingsScreen(),
-                //     ),
-                //   );
-                // },
-              ),
-
-
-            ],
-          ),
+              // onTap: () {
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (_) =>
+              //           const NotificationSettingsScreen(),
+              //     ),
+              //   );
+              // },
+            ),
+          ]),
 
           const SizedBox(height: 22),
 
           // ========================================
           // APPLICATION
           // ========================================
+          _section('Application', [
+            SettingItem(
+              icon: Icons.dark_mode_outlined,
+              title: 'Appearance',
 
-          _section(
-            'Application',
+              // onTap: () {
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (_) =>
+              //           const AppearanceScreen(),
+              //     ),
+              //   );
+              // },
+            ),
 
-            [
-              SettingItem(
-                icon: Icons.dark_mode_outlined,
-                title: 'Appearance',
+            SettingItem(
+              icon: Icons.language_outlined,
+              title: 'Language',
 
-                // onTap: () {
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (_) =>
-                //           const AppearanceScreen(),
-                //     ),
-                //   );
-                // },
-              ),
+              // onTap: () {
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (_) =>
+              //           const LanguageScreen(),
+              //     ),
+              //   );
+              // },
+            ),
 
-              SettingItem(
-                icon: Icons.language_outlined,
-                title: 'Language',
+            SettingItem(
+              icon: Icons.info_outline,
+              title: 'About',
 
-                // onTap: () {
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (_) =>
-                //           const LanguageScreen(),
-                //     ),
-                //   );
-                // },
-              ),
-
-              SettingItem(
-                icon: Icons.info_outline,
-                title: 'About',
-
-                // onTap: () {
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (_) =>
-                //           const AboutScreen(),
-                //     ),
-                //   );
-                // },
-              ),
-            ],
-          ),
+              // onTap: () {
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (_) =>
+              //           const AboutScreen(),
+              //     ),
+              //   );
+              // },
+            ),
+          ]),
 
           const SizedBox(height: 30),
 
           // ========================================
           // LOGOUT
           // ========================================
-
           OutlinedButton.icon(
             onPressed: () {
-              _showLogoutDialog(context);
+              _logout(context);
             },
 
-            icon: const Icon(
-              Icons.logout,
-              color: Colors.red,
-            ),
+            icon: const Icon(Icons.logout, color: Colors.red),
 
-            label: const Text(
-              'Logout',
-              style: TextStyle(
-                color: Colors.red,
-              ),
-            ),
+            label: const Text('Logout', style: TextStyle(color: Colors.red)),
 
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                vertical: 14,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 14),
 
-              side: const BorderSide(
-                color: Colors.red,
-              ),
+              side: const BorderSide(color: Colors.red),
 
               shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
           ),
@@ -215,10 +182,7 @@ class SettingsScreen extends StatelessWidget {
             child: Text(
               'Smart Home v1.0.0',
 
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey, fontSize: 12),
             ),
           ),
         ],
@@ -230,16 +194,11 @@ class SettingsScreen extends StatelessWidget {
   // SECTION
   // ========================================
 
-  Widget _section(
-    String title,
-    List<Widget> children,
-  ) {
+  Widget _section(String title, List<Widget> children) {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
 
       children: [
-
         Text(
           title,
 
@@ -256,13 +215,10 @@ class SettingsScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
 
-            borderRadius:
-                BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20),
           ),
 
-          child: Column(
-            children: children,
-          ),
+          child: Column(children: children),
         ),
       ],
     );
@@ -272,51 +228,51 @@ class SettingsScreen extends StatelessWidget {
   // LOGOUT DIALOG
   // ========================================
 
-  void _showLogoutDialog(
-    BuildContext context,
-  ) {
+  void _logout(BuildContext context) {
     showDialog(
       context: context,
-
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
-          title: const Text(
-            'Logout',
-          ),
-
-          content: const Text(
-            'Are you sure you want to logout?',
-          ),
-
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
           actions: [
-
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
               },
-
-              child: const Text(
-                'Cancel',
-              ),
+              child: const Text('Cancel'),
             ),
 
             FilledButton(
-              onPressed: () {
-                Navigator.pop(context);
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () async {
+                // Đóng dialog
+                Navigator.pop(dialogContext);
 
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Logout successful',
+                try {
+                  // Xóa JWT token
+                  await context.read<ApiService>().clearToken();
+
+                  if (!context.mounted) return;
+
+                  // Quay về LoginScreen và xóa lịch sử điều hướng
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
+                } catch (error) {
+                  if (!context.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Logout failed: $error'),
+                      backgroundColor: Colors.red,
                     ),
-                  ),
-                );
+                  );
+                }
               },
-
-              child: const Text(
-                'Logout',
-              ),
+              child: const Text('Logout'),
             ),
           ],
         );

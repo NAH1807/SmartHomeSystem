@@ -5,6 +5,7 @@ const deviceRoutes = require('./routes/device');
 const automationRoutes = require('./routes/automation');
 const mqttRoutes = require('./routes/mqtt');
 const motionRoutes = require('./routes/motion');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -28,25 +29,11 @@ app.get('/', (req, res) => {
     });
 });
 
-app.use(
-    '/api/devices',
-    deviceRoutes,
-);
-
-app.use(
-    '/api',
-    automationRoutes,
-);
-
-app.use(
-    '/api/mqtt',
-    mqttRoutes,
-);
-
-app.use(
-    '/api',
-    motionRoutes
-);
+app.use('/api/auth', authRoutes);
+app.use('/api/devices', deviceRoutes);
+app.use('/api', automationRoutes);
+app.use('/api/mqtt', mqttRoutes);
+app.use('/api', motionRoutes);
 
 app.use((req, res) => {
     res.status(404).json({

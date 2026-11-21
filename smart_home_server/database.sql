@@ -99,6 +99,9 @@ CREATE TABLE IF NOT EXISTS automations (
 );
 
 
+ALTER TABLE automations
+ADD COLUMN relay_channels JSON NULL;
+
 USE smart_home;
 
 ALTER TABLE devices
@@ -131,6 +134,37 @@ CREATE TABLE IF NOT EXISTS motion_configs (
         REFERENCES devices(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
+);
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE password_reset_otps (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    otp_hash VARCHAR(255) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    attempts INT NOT NULL DEFAULT 0,
+    verified_at DATETIME NULL,
+    used_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_reset_otp_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    INDEX idx_reset_otp_user (user_id),
+    INDEX idx_reset_otp_expiry (expires_at)
+);
 
     UNIQUE KEY uq_motion_configs_device (device_id)
 );

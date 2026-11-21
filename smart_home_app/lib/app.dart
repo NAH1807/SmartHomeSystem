@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:smart_home_app/providers/camera.dart';
 import 'package:smart_home_app/repositories/camera.dart';
 import 'package:smart_home_app/services/camera_recording.dart';
 
-import 'screens/main.dart';
+import 'screens/login.dart';
 import 'services/api.dart';
 import 'repositories/device.dart';
 import 'providers/device.dart';
@@ -13,9 +14,7 @@ import 'repositories/motion.dart';
 import 'theme/app.dart';
 
 class SmartHomeApp extends StatelessWidget {
-  const SmartHomeApp({
-    super.key,
-  });
+  const SmartHomeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,50 +23,32 @@ class SmartHomeApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        // ======================================================
-        // DEVICE PROVIDER
-        // ======================================================
-
+        Provider<ApiService>.value(value: apiService),
+        
         ChangeNotifierProvider<DeviceProvider>(
           create: (_) => DeviceProvider(
-            repository: DeviceRepository(
-              apiService: apiService,
-            ),
-          )..loadDevices(),
+            repository: DeviceRepository(apiService: apiService),
+          ), //..loadDevices(),
         ),
 
-        // ======================================================
-        // MOTION PROVIDER
-        // ======================================================
         ChangeNotifierProvider<MotionProvider>(
           create: (_) => MotionProvider(
-            repository: MotionRepository(
-              apiService: apiService,
-            ),
+            repository: MotionRepository(apiService: apiService),
           ),
         ),
-        
-        // ======================================================
-        // CAMERA PROVIDER
-        // ======================================================
+
         ChangeNotifierProvider<CameraProvider>(
           create: (_) => CameraProvider(
             cameraId: '',
-            repository: CameraRepository(
-              cameraRecordingService,
-            ),
+            repository: CameraRepository(cameraRecordingService),
           ),
         ),
       ],
-
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-
         title: 'Smart Home',
-
         theme: AppTheme.lightTheme,
-
-        home: const MainScreen(),
+        home: const LoginScreen(),
       ),
     );
   }
